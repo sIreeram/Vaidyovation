@@ -1,0 +1,25 @@
+---
+import '../styles/global.css';
+import Logo from '../components/Logo.astro';
+const { title = 'Vaidyovation', description = 'Illuminating Medical Innovation' } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{title === 'Vaidyovation' ? title : `${title} · Vaidyovation`}</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="description" content={description} />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header><div class="wrap">
+    <a href="/" class="logo"><Logo size={38} /><span>Vaidyovation</span></a>
+    <nav><a href="/">Stories</a><a href="/about">About</a><a href="/#subscribe">Subscribe</a></nav>
+  </div></header>
+  <main><slot /></main>
+  <footer><div class="wrap">© {new Date().getFullYear()} Vaidyovation · Illuminating Medical Innovation<br/>For education only. Not a substitute for professional medical advice.</div></footer>
+</body>
+</html>

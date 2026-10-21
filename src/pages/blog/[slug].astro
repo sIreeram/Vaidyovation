@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import ReadAloud from '../../components/ReadAloud.astro';
+import Comments from '../../components/Comments.astro';
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', p => !p.data.draft);
+  return posts.map(post => ({ params: { slug: post.slug }, props: { post } }));
+}
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+<Base title={post.data.title} description={post.data.description}>
+  <article>
+    <span class="tag">{post.data.category}</span>
+    <h1>{post.data.title}</h1>
+    <p class="date">{post.data.date.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</p>
+    {post.data.cover && <img src={post.data.cover} alt="" />}
+    <ReadAloud />
+    <div class="prose"><Content /></div>
+    <p class="disclaimer">This article is for education only and does not replace advice from your own doctor.</p>
+      <Comments />
+  </article>
+</Base>

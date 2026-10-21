@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+const posts = (await getCollection('blog', p => !p.data.draft)).sort((a,b)=>+b.data.date - +a.data.date);
+const BUTTONDOWN = 'YOUR_BUTTONDOWN_USERNAME';
+const cats = [...new Set(posts.map(p => p.data.category))];
+---
+<Base>
+  <section class="hero"><div class="wrap">
+    <h1>Vaidy<span>ovation</span></h1>
+    <p>Illuminating Medical Innovation</p>
+  </div></section>
+  <div class="wrap">
+    <div class="tools">
+      <input id="q" type="search" placeholder="Search stories…" aria-label="Search stories" />
+      <div class="chips">
+        <button class="chip on" data-cat="">All</button>
+        {cats.map(c => <button class="chip" data-cat={c}>{c}</button>)}
+      </div>
+    </div>
+    <div class="grid" id="grid">
+      {posts.map(p => (
+        <a class="card" href={`/blog/${p.slug}`} data-cat={p.data.category} data-text={`${p.data.title} ${p.data.description} ${p.data.category}`.toLowerCase()}>
+          <div class="thumb" style={p.data.cover ? `background-image:url(${p.data.cover})` : ''}></div>
+          <div class="body">
+            <span class="tag">{p.data.category}</span>
+            <h2>{p.data.title}</h2>
+            <p>{p.data.description}</p>
+            <span class="date">{p.data.date.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+    <p class="empty" id="empty" hidden>No stories match your search.</p>
+    <section class="news" id="subscribe">
+      <h2>Stay illuminated</h2>
+      <p style="color:var(--muted);margin:0">New medical stories, straight to your inbox.</p>
+      <form action={`https://buttondown.com/api/emails/embed-subscribe/${BUTTONDOWN}`} method="post" target="popupwindow" onsubmit={`window.open('https://buttondown.com/${BUTTONDOWN}','popupwindow')`}>
+        <input type="email" name="email" placeholder="you@example.com" required />
+        <input type="hidden" value="1" name="embed" />
+        <button type="submit">Subscribe</button>
+      </form>
+    </section>
+  </div>
+  <script>
+    const q = document.getElementById('q'), cards = [...document.querySelectorAll('.card')], chips = [...document.querySelectorAll('.chip')];
+    let cat = '';
+    const run = () => {
+      const t = q.value.trim().toLowerCase(); let n = 0;
+      cards.forEach(c => { const ok = (!cat || c.dataset.cat === cat) && (!t || c.dataset.text.includes(t)); c.hidden = !ok; if (ok) n++; });
+      document.getElementById('empty').hidden = n > 0;
+    };
+    q.addEventListener('input', run);
+    chips.forEach(b => b.addEventListener('click', () => { chips.forEach(x => x.classList.remove('on')); b.classList.add('on'); cat = b.dataset.cat; run(); }));
+  </script>
+</Base>

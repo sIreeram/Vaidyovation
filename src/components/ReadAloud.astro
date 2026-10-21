@@ -1,0 +1,41 @@
+<div class="listen">
+  <button id="play" type="button">▶ Listen</button>
+  <button id="stop" type="button" hidden>■ Stop</button>
+  <span id="lmsg"></span>
+</div>
+<script>
+  const play = document.getElementById('play'), stop = document.getElementById('stop'), msg = document.getElementById('lmsg');
+  const synth = window.speechSynthesis;
+  if (!synth) { document.querySelector('.listen').hidden = true; }
+  let voice = null;
+  const pickVoice = () => {
+    const vs = synth.getVoices(); if (!vs.length) return;
+    const prefs = ['neerja', 'veena', 'heera', 'kalpana', 'swara', 'priya', 'aditi', 'lekha', 'kajal'];
+    const indian = vs.filter(v => /en[-_]IN/i.test(v.lang));
+    voice = indian.find(v => prefs.some(n => v.name.toLowerCase().includes(n)) && /natural|online|neural/i.test(v.name))
+         || indian.find(v => prefs.some(n => v.name.toLowerCase().includes(n)))
+         || indian.find(v => /female|google/i.test(v.name)) || indian[0]
+         || vs.find(v => /hi[-_]IN/i.test(v.lang) && /female|google|lekha|kalpana/i.test(v.name)) || null;
+  };
+  if (synth) { pickVoice(); synth.addEventListener('voiceschanged', pickVoice); }
+  let chunks = [], i = 0, state = 'idle';
+  const speakNext = () => {
+    if (state !== 'playing' || i >= chunks.length) { reset(); return; }
+    const u = new SpeechSynthesisUtterance(chunks[i++]);
+    u.lang = 'en-IN'; if (voice) u.voice = voice; u.rate = 0.92; u.pitch = 1.08; u.volume = 0.95; u.onend = speakNext;
+    synth.speak(u);
+  };
+  function reset() { state = 'idle'; synth.cancel(); play.textContent = '▶ Listen'; stop.hidden = true; msg.textContent = ''; }
+  play.addEventListener('click', () => {
+    if (state === 'idle') {
+      const el = document.querySelector('.prose');
+      const text = (document.querySelector('article h1').innerText + '. ' + el.innerText).replace(/\s+/g, ' ');
+      chunks = text.match(/[^.!?]+[.!?]*/g) || [text]; i = 0; state = 'playing';
+      play.textContent = '❚❚ Pause'; stop.hidden = false; msg.textContent = 'Reading aloud…';
+      speakNext();
+    } else if (state === 'playing') { state = 'paused'; synth.pause(); play.textContent = '▶ Resume'; }
+    else { state = 'playing'; synth.resume(); play.textContent = '❚❚ Pause'; }
+  });
+  stop.addEventListener('click', reset);
+  window.addEventListener('beforeunload', () => synth.cancel());
+</script>
