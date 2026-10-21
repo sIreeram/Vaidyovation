@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 const posts = (await getCollection('blog', p => !p.data.draft)).sort((a,b)=>+b.data.date - +a.data.date);
-const BUTTONDOWN = 'YOUR_BUTTONDOWN_USERNAME';
+const BUTTONDOWN = 'mamillapalli';
 const cats = [...new Set(posts.map(p => p.data.category))];
 ---
 <Base>
